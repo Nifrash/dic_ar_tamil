@@ -1,14 +1,16 @@
 from rest_framework import viewsets
-from .models import Word
 from .serializers import WordSerializer
 from rest_framework.decorators import action
-from rest_framework.response import Response
-from django.db.models import Count
 from random import sample
+from rest_framework.decorators import api_view, permission_classes
+from rest_framework.response import Response
+from rest_framework_api_key.permissions import HasAPIKey
+from .models import Word
 
 class WordViewSet(viewsets.ModelViewSet):
     queryset = Word.objects.all()
     serializer_class = WordSerializer
+    permission_classes = [HasAPIKey]
 
     @action(detail=False, methods=['get'])
     def random(self, request):
@@ -34,3 +36,16 @@ class WordViewSet(viewsets.ModelViewSet):
         serializer = WordSerializer(results, many=True)
         return Response(serializer.data)
 
+
+@api_view(['GET'])
+@permission_classes([HasAPIKey])
+def export_words_json(request):
+    words = Word.objects.all().values(
+        'id',
+        'tamil_word',
+        'arabic_word',
+        'category',
+        'example_sentence'
+    )
+
+    return Response(list(words))
