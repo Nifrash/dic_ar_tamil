@@ -42,6 +42,7 @@ INSTALLED_APPS = [
     'rest_framework_api_key',
     'corsheaders',
     'import_export',
+    'accounts',
 ]
 
 MIDDLEWARE = [
@@ -53,6 +54,7 @@ MIDDLEWARE = [
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
+    'dictionary.middleware.BlockInvalidURLsMiddleware',
 ]
 
 ROOT_URLCONF = 'Dicti_Tam_Arab.urls'
@@ -127,4 +129,12 @@ STATIC_URL = 'static/'
 REST_FRAMEWORK = {
     'DEFAULT_PAGINATION_CLASS': 'rest_framework.pagination.PageNumberPagination',
     'PAGE_SIZE': 20,
+    'DEFAULT_RENDERER_CLASSES': [
+        'rest_framework.renderers.JSONRenderer',
+        'rest_framework.renderers.BrowsableAPIRenderer',
+    ],
 }
+
+LOGIN_URL = 'login'
+LOGIN_REDIRECT_URL = 'user_dashboard'
+LOGOUT_REDIRECT_URL = 'login'

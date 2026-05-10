@@ -1,5 +1,7 @@
 from django.db import models
 from django.core.exceptions import ValidationError
+from django.contrib.auth.models import User
+
 
 class Word(models.Model):
 
@@ -26,17 +28,40 @@ class Word(models.Model):
     )
 
     example_sentence = models.TextField(blank=True, null=True)
+
+    created_by = models.ForeignKey(
+        User,
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name='submitted_words'
+    )
+
+    is_approved = models.BooleanField(default=False)
+
     created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
 
     def clean(self):
-        self.tamil_word = self.tamil_word.strip()
-        self.arabic_word = self.arabic_word.strip()
+        if self.tamil_word:
+            self.tamil_word = self.tamil_word.strip()
 
-        if Word.objects.exclude(pk=self.pk).filter(tamil_word__iexact=self.tamil_word).exists():
-            raise ValidationError({'tamil_word': 'This Tamil word already exists.'})
+        if self.arabic_word:
+            self.arabic_word = self.arabic_word.strip()
 
-        if Word.objects.exclude(pk=self.pk).filter(arabic_word__iexact=self.arabic_word).exists():
-            raise ValidationError({'arabic_word': 'This Arabic word already exists.'})
+        if Word.objects.exclude(pk=self.pk).filter(
+            tamil_word__iexact=self.tamil_word
+        ).exists():
+            raise ValidationError({
+                'tamil_word': 'This Tamil word already exists.'
+            })
+
+        if Word.objects.exclude(pk=self.pk).filter(
+            arabic_word__iexact=self.arabic_word
+        ).exists():
+            raise ValidationError({
+                'arabic_word': 'This Arabic word already exists.'
+            })
 
     def save(self, *args, **kwargs):
         self.full_clean()
